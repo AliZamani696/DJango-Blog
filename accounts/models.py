@@ -1,6 +1,9 @@
 from django.db import models
-
+from django.db.models.signals import post_save
 from django.contrib.auth.models import AbstractUser, BaseUserManager,PermissionsMixin
+import django.utils.translation as _
+from django.dispatch import receiver
+  # For image processing
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -23,7 +26,6 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(email, password, **extra_fields)
-
 class User(AbstractUser,PermissionsMixin):
     '''
         this is custom user model
@@ -46,9 +48,6 @@ class User(AbstractUser,PermissionsMixin):
 
     def __str__(self):
         return self.email
-
-
-
 class Profile(models.Model):
     '''
         this is profile model for user
@@ -64,6 +63,12 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.email}'s profile"
 
+
+@receiver(post_save, sender=User)
+def save_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
+        
 
 
 
