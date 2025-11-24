@@ -44,7 +44,26 @@ class User(AbstractUser,PermissionsMixin):
 
     objects = UserManager()
 
-
-
     def __str__(self):
         return self.email
+
+
+
+class Profile(models.Model):
+    '''
+        this is profile model for user
+    '''
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    frist_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    description = models.TextField(blank=True, null=True)
+    profile_image = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.email}'s profile"
+
+
+
+
