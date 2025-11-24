@@ -1,2 +1,10 @@
-myPrroject
+myProject
 
+__pycache__
+*.pyc
+*.sqlite3
+.env
+.git
+.gitignore
+Dockerfile
+README.md
