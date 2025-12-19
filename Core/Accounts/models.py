@@ -13,6 +13,38 @@ from django.contrib.auth.base_user import BaseUserManager
 
 
 
+
+
+
+class CustomUserManager(BaseUserManager):
+    def CreateUser(self,email,password=None,**extra_fields):
+        if not email:
+            raise ValueError(_("email is required"))
+        email = self.normalize_email(email)
+        user = self.model(email=email,**extra_fields)
+        if password:
+            user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+
+    def create_superuser(self,email,password,**extra_fields):
+        extra_fields.setdefault("is_staff",True)
+        extra_fields.setdefault("is_active",True)
+        extra_fields.setdefault("is_superuser",True)
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError(_("superuser must have is_staff=True"))
+
+        if extra_fields.get("is_active") is not True:
+            raise ValueError(_("superuser must have is_active=True"))
+
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError(_("superuser must have is_superuser=True"))
+
+
+        return self.CreateUser(email,password,**extra_fields)
+
 class CustomUser(AbstractBaseUser,PermissionsMixin):
     email = models.EmailField(
         _("email"),
@@ -48,45 +80,16 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
         blank = True
     )
 
+    email_verified = models.BooleanField(
+        default=False
+    )
+
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
-    objects = "CustomUserManager()"
-
+    objects = CustomUserManager()
     class Meta:
         ordering = ["-date_joined"]
 
     def __str__(self):
         return self.email
-
-
-
-
-class CustomUserManager(BaseUserManager):
-    def CreateUser(self,email,password=None,**extra_fields):
-        if not email:
-            raise ValueError(_("email is required"))
-        email = self.normalize_email(email)
-        user = self.model(email=email,**extra_fields)
-        if password:
-            user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-
-    def CreateSuperUser(self,email,password,**extra_fields):
-        extra_fields.setdefault("is_staff",True)
-        extra_fields.setdefault("is_active",True)
-        extra_fields.setdefault("is_superuser",True)
-
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError(_("superuser must have is_staff=True"))
-
-        if extra_fields.get("is_active") is not True:
-            raise ValueError(_("superuser must have is_active=True"))
-
-        if extra_fields.get("is_superuser") is not True:
-            raise ValueError(_("superuser must have is_superuser=True"))
-
-
-        return self.CreateUser(email,password,**extra_fields)
-
